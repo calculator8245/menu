@@ -1,1 +1,714 @@
-aaa
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>תפריט שבועי – בניית גוף</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: rgba(255,255,255,0.07);
+    --accent: #4ade80;
+    --accent2: #facc15;
+    --accent3: #f87171;
+    --text: #f0f0f0;
+    --muted: #8890a4;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* NAV TABS */
+  .top-bar { position: sticky; top: 0; z-index: 100; background: var(--bg); border-bottom: 1px solid var(--border); padding: 12px 16px 0; }
+  .top-bar h1 { font-size: 13px; font-weight: 400; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex-shrink: 0; padding: 7px 16px; border-radius: 100px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted); transition: all 0.2s; }
+  .tab.active { background: var(--accent); color: #0a0f0a; border-color: transparent; }
+
+  /* SECTIONS NAV */
+  .section-nav { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; scrollbar-width: none; }
+  .section-nav::-webkit-scrollbar { display: none; }
+  .snav-btn { flex-shrink: 0; padding: 5px 14px; border-radius: 100px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--muted); transition: all 0.2s; }
+  .snav-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(74,222,128,0.08); }
+
+  /* CONTENT */
+  .content { padding: 0 16px 100px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* DAY SUMMARY */
+  .day-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0 20px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+  .stat-val { font-size: 20px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* MEAL CARDS */
+  .meal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .meal-type { font-size: 11px; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.04em; }
+  .meal-name { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .meal-detail { font-size: 14px; color: #c0c5d0; line-height: 1.65; margin-bottom: 12px; }
+  .meal-macros { display: flex; gap: 6px; flex-wrap: wrap; }
+  .macro { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 100px; }
+  .m-cal { background: rgba(139,92,246,0.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.25); }
+  .m-prot { background: rgba(74,222,128,0.1); color: #86efac; border: 1px solid rgba(74,222,128,0.2); }
+  .m-carb { background: rgba(250,204,21,0.1); color: #fde68a; border: 1px solid rgba(250,204,21,0.2); }
+
+  /* SHAKE NOTE */
+  .shake-note { background: rgba(74,222,128,0.07); border: 1px solid rgba(74,222,128,0.2); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #86efac; line-height: 1.6; }
+  .shake-note strong { color: var(--accent); }
+
+  /* CONDIMENTS */
+  .cond-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .cond-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 13px; }
+  .cond-name { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+  .cond-cal { font-size: 12px; margin-bottom: 5px; }
+  .cond-note { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 100px; margin-bottom: 5px; }
+  .b-green { background: rgba(74,222,128,0.15); color: #86efac; border: 1px solid rgba(74,222,128,0.25); }
+  .b-amber { background: rgba(250,204,21,0.12); color: #fde68a; border: 1px solid rgba(250,204,21,0.22); }
+  .b-red { background: rgba(248,113,113,0.12); color: #fca5a5; border: 1px solid rgba(248,113,113,0.22); }
+
+  /* NINJA */
+  .ninja-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .ninja-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .ninja-detail { font-size: 13px; color: #c0c5d0; line-height: 1.65; margin-bottom: 8px; }
+  .ninja-macro { font-size: 11px; color: var(--muted); padding-top: 8px; border-top: 1px solid var(--border); }
+
+  /* TRAINING */
+  .training-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; }
+  .training-section h3 { font-size: 13px; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .exercise { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+  .exercise:last-child { border-bottom: none; padding-bottom: 0; }
+  .ex-name { color: var(--text); }
+  .ex-note { font-size: 12px; color: var(--muted); }
+  .alert-box { background: rgba(250,204,21,0.07); border: 1px solid rgba(250,204,21,0.2); border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; font-size: 13px; color: #fde68a; line-height: 1.65; }
+  .alert-box strong { color: var(--accent2); }
+
+  /* TIPS */
+  .tip { background: var(--surface); border-right: 3px solid var(--accent); border-radius: 0 12px 12px 0; padding: 12px 16px; margin-bottom: 10px; font-size: 14px; line-height: 1.6; }
+  .tip strong { color: var(--accent); }
+
+  /* SECTION TITLES */
+  .sec-heading { font-size: 17px; font-weight: 700; margin: 20px 0 12px; }
+  .sec-sub { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>תפריט בניית גוף · כשר</h1>
+  <div class="tabs">
+    <div class="tab active" onclick="showDay(0)">ראשון</div>
+    <div class="tab" onclick="showDay(1)">שני</div>
+    <div class="tab" onclick="showDay(2)">שלישי</div>
+    <div class="tab" onclick="showDay(3)">רביעי</div>
+    <div class="tab" onclick="showDay(4)">חמישי</div>
+    <div class="tab" onclick="showDay(5)">שישי</div>
+    <div class="tab" onclick="showDay(6)">שבת</div>
+  </div>
+</div>
+
+<div class="section-nav">
+  <div class="snav-btn active" onclick="showSection('meals')">🍽 ארוחות</div>
+  <div class="snav-btn" onclick="showSection('condiments')">🥫 רטבים</div>
+  <div class="snav-btn" onclick="showSection('ninja')">🔥 נינגה גריל</div>
+  <div class="snav-btn" onclick="showSection('training')">💪 אימון</div>
+  <div class="snav-btn" onclick="showSection('tips')">✅ כללים</div>
+</div>
+
+<div class="content">
+
+  <!-- MEALS SECTION -->
+  <div class="section active" id="s-meals">
+    <div class="shake-note">
+      <strong>שייק חלבון אחרי אימון</strong> – שתה 25-30ג' חלבון מיד אחרי. ביום מנוחה אין חובה, אפשר להוריד 150-200 קק"ל מפחמימות.
+    </div>
+
+    <!-- Day 0 - ראשון -->
+    <div class="day-section" id="day-0">
+      <div class="day-summary">
+        <div class="stat-card"><div class="stat-val">1,400</div><div class="stat-label">קלוריות</div></div>
+        <div class="stat-card"><div class="stat-val">118ג'</div><div class="stat-label">חלבון</div></div>
+        <div class="stat-card"><div class="stat-val">120ג'</div><div class="stat-label">פחמימות</div></div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">☀️ ארוחת בוקר</div>
+        <div class="meal-name">חביתה + לחם מלא</div>
+        <div class="meal-detail">3 ביצים, 2 פרוסות לחם מלא, ירקות קצוצים (עגבנייה, פלפל), כפית שמן זית. אפשר להוסיף חרדל או סרירצ'ה.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">420 קק"ל</span>
+          <span class="macro m-prot">חלבון 28ג'</span>
+          <span class="macro m-carb">פחמימות 30ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌞 ארוחת צהריים</div>
+        <div class="meal-name">חזה עוף גריל + אורז + סלט</div>
+        <div class="meal-detail">200ג' חזה עוף על הנינגה גריל (מרינדה: חרדל + סויה + שום + לימון), כוס אורז לבן, סלט ירוק עם עגבנייה ומלפפון, לימון.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">550 קק"ל</span>
+          <span class="macro m-prot">חלבון 48ג'</span>
+          <span class="macro m-carb">פחמימות 55ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌙 ארוחת ערב</div>
+        <div class="meal-name">טונה + קינואה + ירקות מוקפצים</div>
+        <div class="meal-detail">190ג' טונה בקופסא (במים), חצי כוס קינואה מבושלת, ברוקולי וגזר מוקפצים עם שום ורוטב סויה.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">430 קק"ל</span>
+          <span class="macro m-prot">חלבון 42ג'</span>
+          <span class="macro m-carb">פחמימות 35ג'</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 1 - שני -->
+    <div class="day-section" id="day-1" style="display:none">
+      <div class="day-summary">
+        <div class="stat-card"><div class="stat-val">1,410</div><div class="stat-label">קלוריות</div></div>
+        <div class="stat-card"><div class="stat-val">113ג'</div><div class="stat-label">חלבון</div></div>
+        <div class="stat-card"><div class="stat-val">128ג'</div><div class="stat-label">פחמימות</div></div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">☀️ ארוחת בוקר</div>
+        <div class="meal-name">יוגורט יווני + קוואקר</div>
+        <div class="meal-detail">200ג' יוגורט יווני 0%, חצי כוס קוואקר, כף דבש, חופן שקדים (15-20 יח'). ממלא וקל להכנה.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">410 קק"ל</span>
+          <span class="macro m-prot">חלבון 25ג'</span>
+          <span class="macro m-carb">פחמימות 45ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌞 ארוחת צהריים</div>
+        <div class="meal-name">שניצל בתנור + בטטה אפויה + סלט</div>
+        <div class="meal-detail">200ג' חזה עוף מצופה פירורי לחם + פפריקה + שום (בנינגה 200° 20 דק'), 2 בטטות קטנות אפויות, סלט קצוץ עם לימון.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">560 קק"ל</span>
+          <span class="macro m-prot">חלבון 50ג'</span>
+          <span class="macro m-carb">פחמימות 60ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌙 ארוחת ערב</div>
+        <div class="meal-name">ביצים קשות + גבינה + לחם שיפון</div>
+        <div class="meal-detail">4 ביצים קשות, 2 פרוסות גבינה צהובה 5%, ירקות חיים, פרוסת לחם שיפון. ארוחה קלה וקלה להכנה.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">440 קק"ל</span>
+          <span class="macro m-prot">חלבון 38ג'</span>
+          <span class="macro m-carb">פחמימות 23ג'</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 2 - שלישי -->
+    <div class="day-section" id="day-2" style="display:none">
+      <div class="day-summary">
+        <div class="stat-card"><div class="stat-val">1,440</div><div class="stat-label">קלוריות</div></div>
+        <div class="stat-card"><div class="stat-val">122ג'</div><div class="stat-label">חלבון</div></div>
+        <div class="stat-card"><div class="stat-val">145ג'</div><div class="stat-label">פחמימות</div></div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">☀️ ארוחת בוקר</div>
+        <div class="meal-name">שיבולת שועל + חמאת בוטנים + בננה</div>
+        <div class="meal-detail">כוס שיבולת שועל מבושלת, כף חמאת בוטנים (כשרה), בננה, 200מ"ל חלב שקדים. עשיר בפחמימות ליום אימון.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">450 קק"ל</span>
+          <span class="macro m-prot">חלבון 22ג'</span>
+          <span class="macro m-carb">פחמימות 60ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌞 ארוחת צהריים</div>
+        <div class="meal-name">ירכי עוף + אורז + ברוקולי אפוי</div>
+        <div class="meal-detail">250ג' ירכי עוף ללא עור (בנינגה גריל), כוס אורז, ברוקולי שלם בתנור עם כפית שמן זית ושום. עסיסי ומשביע.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">590 קק"ל</span>
+          <span class="macro m-prot">חלבון 52ג'</span>
+          <span class="macro m-carb">פחמימות 50ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌙 ארוחת ערב</div>
+        <div class="meal-name">קוטג' + לחם + ירקות</div>
+        <div class="meal-detail">300ג' קוטג' 5%, 2 פרוסות לחם מלא, עגבניות שרי, מלפפון, כף טחינה גולמית. פשוט וממלא.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">400 קק"ל</span>
+          <span class="macro m-prot">חלבון 30ג'</span>
+          <span class="macro m-carb">פחמימות 35ג'</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 3 - רביעי -->
+    <div class="day-section" id="day-3" style="display:none">
+      <div class="day-summary">
+        <div class="stat-card"><div class="stat-val">1,390</div><div class="stat-label">קלוריות</div></div>
+        <div class="stat-card"><div class="stat-val">104ג'</div><div class="stat-label">חלבון</div></div>
+        <div class="stat-card"><div class="stat-val">118ג'</div><div class="stat-label">פחמימות</div></div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">☀️ ארוחת בוקר</div>
+        <div class="meal-name">חביתה עם גבינה קשה</div>
+        <div class="meal-detail">3 ביצים, 30ג' גבינה קשה כשרה (מגוררת), 2 פרוסות לחם מלא, עגבנייה, ספריי שמן. אפשר לאפות בנינגה.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">440 קק"ל</span>
+          <span class="macro m-prot">חלבון 30ג'</span>
+          <span class="macro m-carb">פחמימות 28ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌞 ארוחת צהריים</div>
+        <div class="meal-name">פסטה מלאה + עוף + רוטב עגבניות</div>
+        <div class="meal-detail">80ג' פסטה מלאה (יבש), 180ג' חזה עוף קצוץ, רוטב עגבניות טבעי, בזיליקום, שום. בישול בסיר 20 דק'.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">550 קק"ל</span>
+          <span class="macro m-prot">חלבון 46ג'</span>
+          <span class="macro m-carb">פחמימות 62ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌙 ארוחת ערב</div>
+        <div class="meal-name">סלט טונה + לחם שיפון</div>
+        <div class="meal-detail">190ג' טונה, ירקות קצוצים, כף מיונז קל, עגבנייה, מלפפון, 2 פרוסות לחם שיפון. קל, מהיר, חלבוני.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">400 קק"ל</span>
+          <span class="macro m-prot">חלבון 40ג'</span>
+          <span class="macro m-carb">פחמימות 28ג'</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 4 - חמישי -->
+    <div class="day-section" id="day-4" style="display:none">
+      <div class="day-summary">
+        <div class="stat-card"><div class="stat-val">1,420</div><div class="stat-label">קלוריות</div></div>
+        <div class="stat-card"><div class="stat-val">100ג'</div><div class="stat-label">חלבון</div></div>
+        <div class="stat-card"><div class="stat-val">165ג'</div><div class="stat-label">פחמימות</div></div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">☀️ ארוחת בוקר</div>
+        <div class="meal-name">יוגורט + פירות + גרנולה</div>
+        <div class="meal-detail">200ג' יוגורט יווני, חופן גרנולה ללא סוכר, תפוח או בננה. מהיר להכנה, ממלא לשעות.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">420 קק"ל</span>
+          <span class="macro m-prot">חלבון 22ג'</span>
+          <span class="macro m-carb">פחמימות 50ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌞 ארוחת צהריים</div>
+        <div class="meal-name">המבורגר עוף ביתי + בטטה אפויה</div>
+        <div class="meal-detail">200ג' עוף טחון מתובל (שום, כמון, פפריקה), לחמנייה מלאה, חסה + עגבנייה + חרדל, בטטה בינונית אפויה בנינגה.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">570 קק"ל</span>
+          <span class="macro m-prot">חלבון 50ג'</span>
+          <span class="macro m-carb">פחמימות 55ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌙 ארוחת ערב</div>
+        <div class="meal-name">עדשים + אורז + ירק מוקפץ</div>
+        <div class="meal-detail">כוס עדשים מבושלות, חצי כוס אורז, תרד + פלפל + בצל מוקפצים עם שמן זית ושום. ארוחה צמחונית עשירה.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">430 קק"ל</span>
+          <span class="macro m-prot">חלבון 28ג'</span>
+          <span class="macro m-carb">פחמימות 60ג'</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 5 - שישי -->
+    <div class="day-section" id="day-5" style="display:none">
+      <div class="day-summary">
+        <div class="stat-card"><div class="stat-val">1,430</div><div class="stat-label">קלוריות</div></div>
+        <div class="stat-card"><div class="stat-val">110ג'</div><div class="stat-label">חלבון</div></div>
+        <div class="stat-card"><div class="stat-val">102ג'</div><div class="stat-label">פחמימות</div></div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">☀️ ארוחת בוקר</div>
+        <div class="meal-name">שקשוקה + לחם</div>
+        <div class="meal-detail">3 ביצים ברוטב עגבניות ביתי (עגבנייה, פלפל, בצל, שום, כמון, פפריקה), 2 פרוסות לחם, כף שמן זית. ערב שבת קל.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">460 קק"ל</span>
+          <span class="macro m-prot">חלבון 28ג'</span>
+          <span class="macro m-carb">פחמימות 32ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌞 ארוחת צהריים</div>
+        <div class="meal-name">עוף שלם / שניצל + קינואה + סלט</div>
+        <div class="meal-detail">250ג' עוף (חזה או ירך), חצי כוס קינואה, סלט ישראלי גדול עם לימון ושמן זית. ארוחת שישי קלאסית.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">570 קק"ל</span>
+          <span class="macro m-prot">חלבון 54ג'</span>
+          <span class="macro m-carb">פחמימות 40ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌙 ארוחת ערב</div>
+        <div class="meal-name">גבינות + ירקות + לחם (ערב שבת קל)</div>
+        <div class="meal-detail">200ג' קוטג', 50ג' גבינה בולגרית, ירקות חיים, 2 פרוסות לחם מלא. קל ומהיר לפני שבת.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">400 קק"ל</span>
+          <span class="macro m-prot">חלבון 28ג'</span>
+          <span class="macro m-carb">פחמימות 30ג'</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 6 - שבת -->
+    <div class="day-section" id="day-6" style="display:none">
+      <div class="day-summary">
+        <div class="stat-card"><div class="stat-val">1,560</div><div class="stat-label">קלוריות</div></div>
+        <div class="stat-card"><div class="stat-val">116ג'</div><div class="stat-label">חלבון</div></div>
+        <div class="stat-card"><div class="stat-val">128ג'</div><div class="stat-label">פחמימות</div></div>
+      </div>
+      <div class="shake-note" style="background:rgba(250,204,21,0.07);border-color:rgba(250,204,21,0.2);color:#fde68a">
+        <strong style="color:var(--accent2)">שבת:</strong> תיהנה מהארוחה, זה בסדר. ארוחת שישי גדולה לא תהרוס שבוע של עבודה. תשתדל לא להגזים עם לחם ומתוקים.
+      </div>
+      <div class="meal">
+        <div class="meal-type">☀️ ארוחת בוקר</div>
+        <div class="meal-name">ביצים + סלטים + לחמים (שבתי)</div>
+        <div class="meal-detail">3 ביצים בכל סגנון, ירקות, טחינה (1-2 כפות), לחם מלא. ארוחת בוקר שבתית קלאסית – תיהנה ממנה.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">480 קק"ל</span>
+          <span class="macro m-prot">חלבון 30ג'</span>
+          <span class="macro m-carb">פחמימות 38ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌞 ארוחת צהריים</div>
+        <div class="meal-name">בשר/עוף שבתי + תוספות</div>
+        <div class="meal-detail">300ג' עוף או בשר בבישול, תפו"א / אורז, סלט. ארוחה עשירה וחגיגית – תיהנה ממנה בלי אשמה.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">700 קק"ל</span>
+          <span class="macro m-prot">חלבון 58ג'</span>
+          <span class="macro m-carb">פחמימות 60ג'</span>
+        </div>
+      </div>
+      <div class="meal">
+        <div class="meal-type">🌙 ארוחת ערב</div>
+        <div class="meal-name">שאריות + ביצה / גבינה</div>
+        <div class="meal-detail">שאריות מארוחת הצהריים + ביצה קשה או גבינה להשלמת חלבון. ארוחה קלה לסיום שבת.</div>
+        <div class="meal-macros">
+          <span class="macro m-cal">380 קק"ל</span>
+          <span class="macro m-prot">חלבון 28ג'</span>
+          <span class="macro m-carb">פחמימות 30ג'</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONDIMENTS SECTION -->
+  <div class="section" id="s-condiments">
+    <div class="sec-heading">רטבים ותוספות</div>
+    <div class="sec-sub">ירוק = חופשי לגמרי · כתום = כף-שתיים · אדום = להגביל</div>
+
+    <div class="cond-grid">
+      <div class="cond-card">
+        <div class="badge b-green">✓ חופשי</div>
+        <div class="cond-name">חרדל</div>
+        <div class="cond-cal" style="color:#86efac">~0 קק"ל לכפית</div>
+        <div class="cond-note">מעולה על עוף, שניצל, ביצים. אין מה לחשוב עליו.</div>
+      </div>
+      <div class="cond-card">
+        <div class="badge b-green">✓ חופשי</div>
+        <div class="cond-name">סרירצ'ה</div>
+        <div class="cond-cal" style="color:#86efac">~5 קק"ל לכפית</div>
+        <div class="cond-note">טעם חזק, כמעט אפס קלוריות. שים על הכל.</div>
+      </div>
+      <div class="cond-card">
+        <div class="badge b-green">✓ חופשי</div>
+        <div class="cond-name">רוטב סויה</div>
+        <div class="cond-cal" style="color:#86efac">~5 קק"ל לכף</div>
+        <div class="cond-note">מעולה למרינדה ולהקפצה. שים לב לנתרן.</div>
+      </div>
+      <div class="cond-card">
+        <div class="badge b-green">✓ חופשי</div>
+        <div class="cond-name">לימון + תבלינים</div>
+        <div class="cond-cal" style="color:#86efac">0 קק"ל</div>
+        <div class="cond-note">שום, כמון, פפריקה, פטרוזיליה, שבת – כמה שרוצים.</div>
+      </div>
+      <div class="cond-card">
+        <div class="badge b-amber">⚠ כף-שתיים</div>
+        <div class="cond-name">טחינה גולמית</div>
+        <div class="cond-cal" style="color:#fde68a">~90 קק"ל לכף</div>
+        <div class="cond-note">שומן בריא + חלבון. 1-2 כפות מושלם. מצטבר מהר!</div>
+      </div>
+      <div class="cond-card">
+        <div class="badge b-amber">⚠ כף-שתיים</div>
+        <div class="cond-name">חומוס</div>
+        <div class="cond-cal" style="color:#fde68a">~50 קק"ל ל-3כפות</div>
+        <div class="cond-note">חלבון + פחמימה. 3-4 כפות בסדר. לא כל הקופסא.</div>
+      </div>
+      <div class="cond-card">
+        <div class="badge b-amber">⚠ כף-שתיים</div>
+        <div class="cond-name">שמן זית</div>
+        <div class="cond-cal" style="color:#fde68a">~120 קק"ל לכף</div>
+        <div class="cond-note">שומן איכותי אבל קלורי מאוד. כפית על סלט – מספיק.</div>
+      </div>
+      <div class="cond-card">
+        <div class="badge b-amber">⚠ במידה</div>
+        <div class="cond-name">מיונז קל 30%</div>
+        <div class="cond-cal" style="color:#fde68a">~35 קק"ל לכף</div>
+        <div class="cond-note">גרסת הקלה בסדר. כף אחת על הסנדוויץ' – לא תהרוס.</div>
+      </div>
+      <div class="cond-card">
+        <div class="badge b-red">✗ להגביל</div>
+        <div class="cond-name">מיונז רגיל</div>
+        <div class="cond-cal" style="color:#fca5a5">~100 קק"ל לכף</div>
+        <div class="cond-note">2 כפות = 200 קק"ל בלי שהרגשת. עדיף קל.</div>
+      </div>
+      <div class="cond-card">
+        <div class="badge b-red">✗ להגביל</div>
+        <div class="cond-name">קטשופ</div>
+        <div class="cond-cal" style="color:#fca5a5">סוכר מיותר</div>
+        <div class="cond-note">עדיף חרדל או סרירצ'ה לאותה תחושה, בלי הסוכר.</div>
+      </div>
+    </div>
+
+    <div class="sec-heading">תוספות מושלמות לתפריט</div>
+    <div class="tip"><strong>בטטה אפויה</strong> – פחמימה איכותית עם ויטמינים. עדיפה על אורז ביום אימון. 150ג' ≈ 130 קק"ל.</div>
+    <div class="tip"><strong>תפוח אדמה בתנור</strong> – פחמימה זולה ומשביעה. קוביות + פפריקה + שמן זית = מעולה. 150ג' ≈ 120 קק"ל.</div>
+    <div class="tip"><strong>קינואה</strong> – פחמימה + חלבון ביחד. חצי כוס מבושלת ≈ 110 קק"ל, 4ג' חלבון. עדיפה על פסטה לפעמים.</div>
+    <div class="tip"><strong>עדשים / חומוס מבושל</strong> – חלבון + סיבים. כוס עדשים ≈ 230 קק"ל, 18ג' חלבון. ארוחת ערב מעולה.</div>
+  </div>
+
+  <!-- NINJA SECTION -->
+  <div class="section" id="s-ninja">
+    <div class="sec-heading">נינגה גריל – מתכונים</div>
+    <div class="sec-sub">כל המתכונים האלה מהירים, בריאים, ומתאימים לתפריט</div>
+
+    <div class="ninja-card">
+      <div class="ninja-title">🔥 חזה עוף מרינדה</div>
+      <div class="ninja-detail">
+        <strong>מרינדה:</strong> חרדל (1כף) + רוטב סויה (1כף) + שום כתוש + לימון + פפריקה מעושנת + פלפל שחור.<br><br>
+        השרה 30 דק' לפחות (אפשר לילה). גריל בינוני-גבוה, 6-7 דק' כל צד. אל תייבש!<br><br>
+        <em>טיפ: חתוך בפינצטה באמצע – אם לא ורוד, מוכן.</em>
+      </div>
+      <div class="ninja-macro">200ג' ≈ 220 קק"ל · חלבון 46ג' · פחמימות 0ג' · הכי יעיל בתפריט</div>
+    </div>
+
+    <div class="ninja-card">
+      <div class="ninja-title">🍠 בטטה / תפוח אדמה אפוי</div>
+      <div class="ninja-detail">
+        חתוך לקוביות 2-3 ס"מ. ערבב: כפית שמן זית + מלח + פפריקה + שום גרנולות + פלפל.<br><br>
+        200° (אוויר חם אם יש), 20-25 דק'. הפוך פעם אחת באמצע. יוצא פריך מבחוץ, רך מבפנים.<br><br>
+        <em>אפשר להכין כמות גדולה ולשמור 3 ימים במקרר.</em>
+      </div>
+      <div class="ninja-macro">בטטה 150ג' ≈ 130 קק"ל · חלבון 2ג' · פחמימות 30ג' | תפוח אדמה ≈ 120 קק"ל</div>
+    </div>
+
+    <div class="ninja-card">
+      <div class="ninja-title">🥦 ירקות אפויים</div>
+      <div class="ninja-detail">
+        ברוקולי, כרובית, פלפלים, קישואים, גזר, אספרגוס – כל שילוב.<br><br>
+        כפית שמן זית + מלח + פפריקה + שום. 180° 20-22 דק'.<br><br>
+        <em>כמות חופשית לחלוטין – מלא סיבים, קמעא קלוריות, שובע אמיתי.</em>
+      </div>
+      <div class="ninja-macro">כוס ירקות אפויים ≈ 40-70 קק"ל · פחמימות נמוכות · סיבים גבוהים</div>
+    </div>
+
+    <div class="ninja-card">
+      <div class="ninja-title">🍗 שניצל עוף בתנור (לא מטוגן)</div>
+      <div class="ninja-detail">
+        חזה עוף דק (אפשר להכות טיפה). טבול: ביצה טרופה → פירורי לחם + פפריקה + שום + מלח.<br><br>
+        ספריי שמן על תבנית. 200° 22-25 דק'. אל תפתח בינתיים.<br><br>
+        <em>הרבה יותר טוב מהמטוגן – 30% פחות קלוריות, יותר חלבון ביחס.</em>
+      </div>
+      <div class="ninja-macro">200ג' ≈ 320 קק"ל · חלבון 44ג' · עדיף על מטוגן</div>
+    </div>
+
+    <div class="ninja-card">
+      <div class="ninja-title">🍳 שקשוקה/ביצים אפויות</div>
+      <div class="ninja-detail">
+        תבנית קטנה. רוטב עגבניות מוכן (או טרי) + פלפל + בצל + כמון + פפריקה.<br><br>
+        בשל 5 דק' בנינגה 180°. שבור 3-4 ביצים פנימה. גבינה קשה מגוררת מעל (כשר).<br><br>
+        עוד 12-15 דק' עד שהחלבון קופא. רץ לאכול.
+      </div>
+      <div class="ninja-macro">≈ 380-420 קק"ל · חלבון 30-34ג' · ארוחת בוקר מנצחת</div>
+    </div>
+
+    <div class="ninja-card">
+      <div class="ninja-title">🍔 קציצות עוף טחון</div>
+      <div class="ninja-detail">
+        500ג' עוף טחון + 1 ביצה + שום כתוש + כמון + פפריקה + מלח + פלפל + פטרוזיליה.<br><br>
+        עצב קציצות, ספריי שמן, גריל 200° 15-18 דק'.<br><br>
+        <em>הכן כמות גדולה – ישמור 4 ימים במקרר. אוכל מהיר לכל ארוחה.</em>
+      </div>
+      <div class="ninja-macro">קציצה 100ג' ≈ 160 קק"ל · חלבון 22ג' · נוח להכנה מראש</div>
+    </div>
+  </div>
+
+  <!-- TRAINING SECTION -->
+  <div class="section" id="s-training">
+    <div class="sec-heading">תוכנית אימון</div>
+    <div class="sec-sub">Full Body · 3 פעמים בשבוע (א/ג/ה) · 3-4 סטים, 8-12 חזרות</div>
+
+    <div class="alert-box">
+      <strong>⚠ שינוי מומלץ בתרגילים:</strong><br>
+      התוכנית הנוכחית שלך חסרה תרגילים מורכבים חשובים. הוסף את אלה בהדרגה – הם מה שבונה גוף אמיתי.
+    </div>
+
+    <div class="training-section">
+      <h3>🦵 רגליים</h3>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">Leg Press במכונה</div>
+          <div class="ex-note">✓ יש לך – תרגיל עיקרי, שמור</div>
+        </div>
+      </div>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">Leg Curl (כיפוף ברך)</div>
+          <div class="ex-note">✓ יש לך – שמור</div>
+        </div>
+      </div>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">⭐ Squat / Goblet Squat</div>
+          <div class="ex-note">הוסף – חשוב מאוד לרגליים</div>
+        </div>
+      </div>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">Leg Extension</div>
+          <div class="ex-note">משני – אפשר להשאיר</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="training-section">
+      <h3>🏋 גב</h3>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">Lat Pulldown</div>
+          <div class="ex-note">✓ יש לך – תרגיל עיקרי</div>
+        </div>
+      </div>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">Seated Row (חתירה)</div>
+          <div class="ex-note">✓ יש לך – שמור</div>
+        </div>
+      </div>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">⭐ Deadlift (עם מדריך)</div>
+          <div class="ex-note">הוסף בהדרגה – מלך התרגילים</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="training-section">
+      <h3>💪 חזה</h3>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">⭐ Bench Press (מוט / משקולות)</div>
+          <div class="ex-note">הוסף – תרגיל עיקרי חסר</div>
+        </div>
+      </div>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">לחיצת חזה שיפוע חיובי</div>
+          <div class="ex-note">✓ יש לך – שמור</div>
+        </div>
+      </div>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">פרפר</div>
+          <div class="ex-note">משני – אפשר להשאיר</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="training-section">
+      <h3>🙆 כתפיים</h3>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">Overhead Press (דחיקה מעל ראש)</div>
+          <div class="ex-note">✓ יש לך – תרגיל עיקרי</div>
+        </div>
+      </div>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">Lateral Raise (הרחקת כתף)</div>
+          <div class="ex-note">✓ יש לך – שמור</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="training-section">
+      <h3>💡 יד קדמית ואחורית</h3>
+      <div class="exercise">
+        <div>
+          <div class="ex-name">Bicep Curl + Tricep</div>
+          <div class="ex-note">⚠ לא עדיפות עכשיו – הגוף יגדל מהתרגילים המורכבים</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-box" style="margin-top:14px">
+      <strong>זמני מנוחה בין סטים:</strong> 90-120 שניות לתרגילים כבדים · 60 שניות לתרגילי בידוד.<br><br>
+      <strong>עלייה במשקלים:</strong> כשאתה עושה 12 חזרות בקלות – העלה 2.5-5 ק"ג בשבוע הבא.
+    </div>
+  </div>
+
+  <!-- TIPS SECTION -->
+  <div class="section" id="s-tips">
+    <div class="sec-heading">כללים לצאת מ-Skinny Fat</div>
+
+    <div class="tip"><strong>חלבון ראשון, תמיד.</strong> בכל ארוחה – תתחיל מהחלבון (עוף, ביצים, גבינה, טונה). זה מה שבונה שריר ומחזיק אותך שבע.</div>
+    <div class="tip"><strong>150-160ג' חלבון ביום.</strong> עם שייק אחרי אימון אתה מגיע לשם. בלי זה – הגוף לא יבנה שריר גם אם תתאמן מצוין.</div>
+    <div class="tip"><strong>מים – 2.5-3 ליטר ביום.</strong> רעב שווה הרבה פעמים צמא. לפני שאתה אוכל ביניים – שתה כוס מים ותחכה 5 דק'.</div>
+    <div class="tip"><strong>שינה – 7-8 שעות חובה.</strong> הגוף בונה שריר בשינה, לא באימון. פחות שינה = פחות תוצאות, יותר שומן.</div>
+    <div class="tip"><strong>3 אימונים בשבוע, לא 6.</strong> Full body א/ג/ה. השריר גדל בהתאוששות. יותר לא שווה יותר בשלב הזה.</div>
+    <div class="tip"><strong>שקל פעם בשבוע, בוקר.</strong> לא כל יום. משקל יכול לקפץ 1-2 ק"ג ביום בגלל מים. תסתכל על ממוצע שבועי.</div>
+    <div class="tip"><strong>אל תפחד מפחמימות.</strong> אורז, בטטה, קינואה – אלה לא האויב. הם הדלק לאימון. חתוך את הסוכר המעובד, לא פחמימות אמיתיות.</div>
+    <div class="tip"><strong>הכן אוכל מראש.</strong> עוף בנינגה + בטטה + ירקות אפויים = 3 ארוחות מוכנות. אל תסתמך על כוח רצון ברגעי רעב.</div>
+    <div class="tip"><strong>שבת = לא עוצרת הכל.</strong> ארוחה גדולה אחת בשבוע לא תהרוס כלום. הגוף לא שכח את כל השאר. תיהנה, ותחזור ביום ראשון.</div>
+    <div class="tip"><strong>3-6 חודשים לתוצאות אמיתיות.</strong> שבועיים זה לא מספיק. תחייב ל-6 חודשים ותיראה גוף שונה לחלוטין. אין קיצורי דרך.</div>
+  </div>
+
+</div>
+
+<script>
+  const days = ['day-0','day-1','day-2','day-3','day-4','day-5','day-6'];
+  const tabs = document.querySelectorAll('.tab');
+
+  function showDay(i) {
+    days.forEach(d => { const el = document.getElementById(d); if(el) el.style.display = 'none'; });
+    tabs.forEach(t => t.classList.remove('active'));
+    const target = document.getElementById(days[i]);
+    if(target) target.style.display = 'block';
+    tabs[i].classList.add('active');
+    tabs[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+
+  const sections = ['meals','condiments','ninja','training','tips'];
+  const snavBtns = document.querySelectorAll('.snav-btn');
+
+  function showSection(name) {
+    sections.forEach(s => {
+      const el = document.getElementById('s-' + s);
+      if(el) el.classList.remove('active');
+    });
+    snavBtns.forEach(b => b.classList.remove('active'));
+    const target = document.getElementById('s-' + name);
+    if(target) target.classList.add('active');
+    const idx = sections.indexOf(name);
+    if(snavBtns[idx]) {
+      snavBtns[idx].classList.add('active');
+      snavBtns[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }
+</script>
+</body>
+</html>
